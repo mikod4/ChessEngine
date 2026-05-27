@@ -1,10 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from src.engine import chess_model
-
-#START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-#START = "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3"
-START = "r1bqkbnr/pppppppp/8/2n5/4K3/8/PPPPPPPP/RNBQ1BNR w KQkq - 0 1"
-
+from src.utils.constants import FEN_DEFAULT
 
 class GameController(QObject):
     board_updated = pyqtSignal(str)
@@ -17,11 +13,10 @@ class GameController(QObject):
 
     def __init__(self):
         super().__init__()
-        self.model = chess_model.ChessModel(START)
+        self.model = chess_model.ChessModel(FEN_DEFAULT)
         self.selected_square = None
 
     def run_initial_checks(self):
-        print(self.model.board.is_check())
         if self.model.get_check_square():
             self.highlight_check.emit(self.model.get_check_square())
 

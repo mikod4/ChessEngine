@@ -1,12 +1,8 @@
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QPainter, QColor, QBrush
-from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsEllipseItem
-from PyQt6.QtSvgWidgets import QGraphicsSvgItem
-
-SQUARE_SIZE = 60
-COLOR = [(240, 217, 181), (181, 136, 99)]
-HIGLIGHT_COLOR = QColor(255, 70, 70, 80)
-CHECK_COLOR = QColor(255, 0, 0, 150)
+from PyQt6.QtGui import QPainter, QColor, QBrush, QPen
+from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsEllipseItem, QFrame
+from src.views.piece import Piece
+from src.utils.constants import SQUARE_SIZE, COLOR, HIGLIGHT_COLOR, CHECK_COLOR
 
 class Board(QGraphicsView):
     square_clicked = pyqtSignal(str)
@@ -16,6 +12,8 @@ class Board(QGraphicsView):
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        self.setFrameShape(QFrame.Shape.NoFrame)
 
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
@@ -32,11 +30,23 @@ class Board(QGraphicsView):
 
     def draw_board(self):
         colors = [QColor(*x) for x in COLOR]
+
+        pen = QPen(QColor(0, 0, 0))
+        pen.setWidth(1)
+        offset = pen.width() / 2.0
+        adjusted_size = SQUARE_SIZE - pen.width()
+
         for row in range(8):
             for col in range(8):
                 color = colors[(row + col) % 2]
-                rect = QGraphicsRectItem(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+
+                x = (col * SQUARE_SIZE) + offset
+                y = (row * SQUARE_SIZE) + offset
+
+                rect = QGraphicsRectItem(x, y, adjusted_size, adjusted_size)
                 rect.setBrush(QBrush(color))
+                rect.setPen(pen)
+
                 self.scene.addItem(rect)
 
     def clear_check_highlight(self):
@@ -98,7 +108,7 @@ class Board(QGraphicsView):
 
     def update_board(self, fen):
         for item in self.scene.items():
-            if isinstance(item, QGraphicsSvgItem):
+            if isinstance(item, Piece):
                 self.scene.removeItem(item)
 
         rows = fen.split()[0].split('/')
@@ -108,10 +118,6 @@ class Board(QGraphicsView):
                 if char.isdigit():
                     col_index += int(char)
                 else:
-                    piece_item = QGraphicsSvgItem(f"assets/images/pieces/{char}.svg")
-                    bounds = piece_item.boundingRect()
-                    scale = SQUARE_SIZE / max(bounds.width(), bounds.height())
-                    piece_item.setScale(scale)
-                    piece_item.setPos(col_index * SQUARE_SIZE, row_index * SQUARE_SIZE)
+                    piece_item = Piece(char, row_index, col_index)
                     self.scene.addItem(piece_item)
                     col_index += 1
