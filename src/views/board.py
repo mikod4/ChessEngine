@@ -8,6 +8,7 @@ from PyQt6.QtSvgWidgets import QGraphicsSvgItem
 SQUARE_SIZE = 60
 COLOR = [(240, 217, 181), (181, 136, 99)]
 HIGLIGHT_COLOR = QColor(255, 70, 70, 80)
+CHECK_COLOR = QColor(255, 0, 0, 150)
 
 class Board(QGraphicsView):
     square_clicked = pyqtSignal(str)
@@ -40,12 +41,26 @@ class Board(QGraphicsView):
                 rect.setBrush(QBrush(color))
                 self.scene.addItem(rect)
 
-    def clear_highlights(self):
+    def clear_check_highlight(self):
+        for item in self.scene.items():
+            if isinstance(item, QGraphicsRectItem) and item.brush().color() == CHECK_COLOR:
+                self.scene.removeItem(item)
+    
+    def highlight_check(self, square):
+        col = ord(square[0]) - ord('a')
+        row = 8 - int(square[1])
+
+        rect = QGraphicsRectItem(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+        rect.setBrush(QBrush(CHECK_COLOR))
+        rect.setZValue(4)
+        self.scene.addItem(rect)
+
+    def clear_move_highlights(self):
         for dot in self.hint_items:
             self.scene.removeItem(dot)
         self.hint_items.clear()
     
-    def show_highlights(self, squares):
+    def show_move_highlights(self, squares):
         for sq in squares:
             col = ord(sq[2]) - ord('a')
             row = 8 - int(sq[3])

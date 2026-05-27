@@ -25,6 +25,11 @@ class ChessModel:
     def get_board_fen(self):
         return self.board.fen()
     
+    def get_check_square(self):
+        if self.board.is_check():
+            return chess.square_name(self.board.king(self.board.turn))
+        return None
+    
     def get_last_move(self):
         if self.board.move_stack:
             move = self.board.peek()

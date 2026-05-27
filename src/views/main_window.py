@@ -23,9 +23,11 @@ class MainWindow(QMainWindow):
         self.board.square_clicked.connect(self.controller.handle_square_click)
         self.controller.board_updated.connect(self.board.update_board)
         self.controller.move_made.connect(self.add_move_to_pgn)
-        self.controller.show_highlights.connect(self.board.show_highlights)
-        self.controller.clear_highlights.connect(self.board.clear_highlights)
+        self.controller.show_move_highlights.connect(self.board.show_move_highlights)
+        self.controller.clear_move_highlights.connect(self.board.clear_move_highlights)
         self.controller.illegal_move.connect(self.play_error_sounds)
+        self.controller.highlight_check.connect(self.board.highlight_check)
+        self.controller.clear_check_highlight.connect(self.board.clear_check_highlight)
 
     def setup_ui(self):
         central_widget = QWidget()
@@ -104,9 +106,6 @@ class MainWindow(QMainWindow):
         for menu_item in self.bot_menu.actions():
             if menu_item != engine_action:
                 menu_item.setChecked(False)
-
-
-        
 
     def toggle_eval_bar(self, show=None):
         if show is None:
