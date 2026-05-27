@@ -1,5 +1,3 @@
-from weakref import ref
-
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QPainter, QColor, QBrush
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsEllipseItem
@@ -73,7 +71,6 @@ class Board(QGraphicsView):
             dot = QGraphicsEllipseItem(center_x - radius, center_y - radius, radius * 2, radius * 2)
 
             dot.setBrush(QBrush(HIGLIGHT_COLOR))
-            #dot.setPen(Qt.PenStyle.NoPen)
             dot.setZValue(5)
             
             self.scene.addItem(dot)

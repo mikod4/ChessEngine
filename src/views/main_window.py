@@ -29,6 +29,8 @@ class MainWindow(QMainWindow):
         self.controller.highlight_check.connect(self.board.highlight_check)
         self.controller.clear_check_highlight.connect(self.board.clear_check_highlight)
 
+        self.controller.run_initial_checks()
+
     def setup_ui(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
