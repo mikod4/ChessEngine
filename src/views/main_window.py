@@ -53,23 +53,39 @@ class MainWindow(QMainWindow):
     def create_menu(self):
         menu_bar = self.menuBar()
 
-        view_menu = menu_bar.addMenu("Pokaż")
+        self.view_menu = menu_bar.addMenu("Pokaż")
 
         self.toggle_eval_action = QAction("Pasek Ewaluacji", self)
         self.toggle_eval_action.setCheckable(True)
         self.toggle_eval_action.setChecked(True) 
         self.toggle_eval_action.triggered.connect(self.toggle_eval_bar)
-        view_menu.addAction(self.toggle_eval_action)
+        self.view_menu.addAction(self.toggle_eval_action)
 
-        view_menu.addSeparator()
+        self.view_menu.addSeparator()
 
         self.toggle_pgn_action = QAction("Notacja PGN", self)
         self.toggle_pgn_action.setCheckable(True)
         self.toggle_pgn_action.setChecked(True)
         self.toggle_pgn_action.triggered.connect(self.toggle_pgn_list)
-        view_menu.addAction(self.toggle_pgn_action)
+        self.view_menu.addAction(self.toggle_pgn_action)
 
-        bot_menu = menu_bar.addMenu("Silnik")
+        
+        
+        self.bot_menu = menu_bar.addMenu("Silnik")
+
+        self.engine1_action = QAction("Włącz Silnik 1", self)
+        self.engine1_action.setCheckable(True)
+        self.engine1_action.setChecked(True)
+        self.engine1_action.triggered.connect(lambda: self.change_bot(self.engine1_action))
+        self.bot_menu.addAction(self.engine1_action)
+
+        self.bot_menu.addSeparator()
+
+        self.engine2_action = QAction("Włącz Silnik 2", self)
+        self.engine2_action.setCheckable(True)
+        self.engine2_action.triggered.connect(lambda: self.change_bot(self.engine2_action))
+        self.bot_menu.addAction(self.engine2_action)
+
 
     def add_move_to_pgn(self, move):
         if self.last_col == 0:
@@ -81,6 +97,16 @@ class MainWindow(QMainWindow):
 
 
         self.pgn_list.scrollToBottom()
+
+    def change_bot(self, engine_action):
+        print(f"Changing bot to: {engine_action.text()}")
+
+        for menu_item in self.bot_menu.actions():
+            if menu_item != engine_action:
+                menu_item.setChecked(False)
+
+
+        
 
     def toggle_eval_bar(self, show=None):
         if show is None:
