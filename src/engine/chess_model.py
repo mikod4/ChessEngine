@@ -15,5 +15,12 @@ class ChessModel:
         except ValueError:
             return False
         
+    def get_legal_moves(self, square):
+        try:
+            square_index = chess.parse_square(square)
+            return [move.uci() for move in self.board.legal_moves if move.from_square == square_index]
+        except ValueError:
+            return []
+        
     def get_board_fen(self):
         return self.board.fen()
