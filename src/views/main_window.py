@@ -1,10 +1,10 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon, QAction
-from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QProgressBar, QListWidget
+from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QProgressBar, QTableWidget, QTableWidgetItem
 from src.controllers.game_controller import GameController
 from src.views.board import Board
 
-START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -13,14 +13,16 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Chess")
         self.setWindowIcon(QIcon("assets/icons/icon.svg"))
 
+        self.controller = GameController()
 
         self.setup_ui()
-        self.update_board(START)
+        self.update_board()
 
-        self.controller = GameController()
+        self.last_col = 0
 
         self.board.square_clicked.connect(self.controller.handle_square_click)
         self.controller.board_updated.connect(self.board.update_board)
+        self.controller.move_made.connect(self.add_move_to_pgn)
         self.controller.show_highlights.connect(self.board.show_highlights)
         self.controller.clear_highlights.connect(self.board.clear_highlights)
         self.controller.illegal_move.connect(self.play_error_sounds)
@@ -36,7 +38,10 @@ class MainWindow(QMainWindow):
 
         self.board = Board()
 
-        self.pgn_list = QListWidget()
+        self.pgn_list = QTableWidget()
+        self.pgn_list.setRowCount(0)
+        self.pgn_list.setColumnCount(2)
+        self.pgn_list.setHorizontalHeaderLabels(["Białe", "Czarne"])
 
         layout.addWidget(self.eval_bar)
         layout.addWidget(self.board)
@@ -65,7 +70,18 @@ class MainWindow(QMainWindow):
         view_menu.addAction(self.toggle_pgn_action)
 
         bot_menu = menu_bar.addMenu("Silnik")
-    
+
+    def add_move_to_pgn(self, move):
+        if self.last_col == 0:
+            self.pgn_list.insertRow(self.pgn_list.rowCount())
+
+        self.pgn_list.setItem(self.pgn_list.rowCount()-1, self.last_col, QTableWidgetItem(move))
+
+        self.last_col = (self.last_col + 1) % 2
+
+
+        self.pgn_list.scrollToBottom()
+
     def toggle_eval_bar(self, show=None):
         if show is None:
             show = not self.eval_bar.isVisibleTo(self)
@@ -76,8 +92,8 @@ class MainWindow(QMainWindow):
             show = not self.pgn_list.isVisibleTo(self)
         self.pgn_list.setVisible(show)
 
-    def update_board(self, fen):
-        self.board.update_board(fen)
+    def update_board(self):
+        self.board.update_board(self.controller.model.get_board_fen())
 
     def play_error_sounds(self):
         print("Illegal move attempted!")

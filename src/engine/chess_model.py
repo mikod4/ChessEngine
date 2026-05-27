@@ -1,8 +1,8 @@
 import chess
 
 class ChessModel:
-    def __init__(self):
-        self.board = chess.Board()
+    def __init__(self, fen=None):
+        self.board = chess.Board(fen) if fen else chess.Board()
 
     def try_move(self, move_uci):
         try:
@@ -24,3 +24,15 @@ class ChessModel:
         
     def get_board_fen(self):
         return self.board.fen()
+    
+    def get_last_move(self):
+        if self.board.move_stack:
+            move = self.board.peek()
+            self.board.pop()
+
+            last_move = self.board.san(move)
+            self.board.push(move)
+
+            return last_move
+        
+        return None
