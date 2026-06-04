@@ -1,6 +1,10 @@
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal, QThread
+import subprocess
+import chess
 from src.engine import chess_model
+from src.engine.bots import bot_random
 from src.utils.constants import FEN_DEFAULT
+
 
 class GameController(QObject):
     board_updated = pyqtSignal(str)
@@ -10,10 +14,13 @@ class GameController(QObject):
     clear_move_highlights = pyqtSignal()
     highlight_check = pyqtSignal(str)
     clear_check_highlight = pyqtSignal()
+    game_over = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
         self.model = chess_model.ChessModel(FEN_DEFAULT)
+        self.bot_model = bot_random.RandomBot()
+        self.player_color = chess.WHITE
         self.selected_square = None
 
     def run_initial_checks(self):
@@ -30,11 +37,23 @@ class GameController(QObject):
             else:
                 self.clear_check_highlight.emit()
 
+            if not self.model.is_game_over() and self.model.board.turn != self.player_color:
+
+                subprocess.call(self.make_bot_move())
+
             return True
+
         else:
             self.illegal_move.emit()
             return False
-        
+
+    def make_bot_move(self):
+        self.make_move(
+            self.bot_model.get_move(
+                self.model.get_board()
+            )
+        )
+
     def get_board_fen(self):
         return self.model.get_board_fen()
 

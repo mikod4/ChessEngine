@@ -4,13 +4,15 @@ from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QG
 from src.views.piece import Piece
 from src.utils.constants import SQUARE_SIZE, COLOR, HIGLIGHT_COLOR, CHECK_COLOR
 
+
 class Board(QGraphicsView):
     square_clicked = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
 
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self.setFrameShape(QFrame.Shape.NoFrame)
@@ -20,12 +22,11 @@ class Board(QGraphicsView):
 
         self.setFixedSize(SQUARE_SIZE * 8, SQUARE_SIZE * 8)
         self.scene = QGraphicsScene(self)
-        
+
         self.scene.setSceneRect(0, 0, SQUARE_SIZE * 8, SQUARE_SIZE * 8)
         self.setScene(self.scene)
 
         self.hint_items = []
-
         self.draw_board()
 
     def draw_board(self):
@@ -53,12 +54,13 @@ class Board(QGraphicsView):
         for item in self.scene.items():
             if isinstance(item, QGraphicsRectItem) and item.brush().color() == CHECK_COLOR:
                 self.scene.removeItem(item)
-    
+
     def highlight_check(self, square):
         col = ord(square[0]) - ord('a')
         row = 8 - int(square[1])
 
-        rect = QGraphicsRectItem(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+        rect = QGraphicsRectItem(
+            col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
         rect.setBrush(QBrush(CHECK_COLOR))
         rect.setZValue(4)
         self.scene.addItem(rect)
@@ -67,7 +69,7 @@ class Board(QGraphicsView):
         for dot in self.hint_items:
             self.scene.removeItem(dot)
         self.hint_items.clear()
-    
+
     def show_move_highlights(self, squares):
         for sq in squares:
             col = ord(sq[2]) - ord('a')
@@ -78,23 +80,23 @@ class Board(QGraphicsView):
 
             radius = SQUARE_SIZE * 0.15
 
-            dot = QGraphicsEllipseItem(center_x - radius, center_y - radius, radius * 2, radius * 2)
+            dot = QGraphicsEllipseItem(
+                center_x - radius, center_y - radius, radius * 2, radius * 2)
 
             dot.setBrush(QBrush(HIGLIGHT_COLOR))
             dot.setZValue(5)
-            
+
             self.scene.addItem(dot)
             self.hint_items.append(dot)
-            
-    
+
     def get_square_from_position(self, pos):
         col = int(pos.x() // SQUARE_SIZE)
         row = int(pos.y() // SQUARE_SIZE)
 
         if 0 <= col < 8 and 0 <= row < 8:
-           return f"{chr(col + ord('a'))}{8 - row}"
+            return f"{chr(col + ord('a'))}{8 - row}"
         return None
-    
+
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             pos = self.mapToScene(event.pos())
@@ -103,8 +105,6 @@ class Board(QGraphicsView):
                 self.square_clicked.emit(square)
 
         super().mousePressEvent(event)
-        
-        
 
     def update_board(self, fen):
         for item in self.scene.items():
