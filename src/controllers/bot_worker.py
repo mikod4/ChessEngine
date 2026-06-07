@@ -1,4 +1,4 @@
-from PyQt6 import QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal
 
 class BotWorker(QThread):
     move_ready = pyqtSignal(str)

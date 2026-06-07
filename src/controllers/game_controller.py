@@ -1,7 +1,10 @@
 from PyQt6.QtCore import QObject, pyqtSignal
+import chess
 from src.engine import chess_model
+from src.engine.bots import bot_random
 from src.utils.constants import FEN_DEFAULT
 from src.controllers.bot_worker import BotWorker
+
 
 class GameController(QObject):
     board_updated = pyqtSignal(str)
@@ -13,9 +16,12 @@ class GameController(QObject):
     clear_check_highlight = pyqtSignal()
     promote_pawn = pyqtSignal(str, str)
 
+
     def __init__(self):
         super().__init__()
         self.model = chess_model.ChessModel(FEN_DEFAULT)
+        self.bot_model = bot_random.RandomBot()
+        self.player_color = chess.WHITE
         self.selected_square = None
 
         self.is_bot_thinking = False
@@ -35,10 +41,12 @@ class GameController(QObject):
             else:
                 self.clear_check_highlight.emit()
 
+
             if not self.is_bot_thinking:
                 self.trigger_bot_turn()
 
             return True
+
         else:
             self.illegal_move.emit()
             return False
@@ -89,6 +97,7 @@ class GameController(QObject):
             self.selected_square = square
             legal_moves = self.model.get_legal_moves(square)
             self.show_move_highlights.emit(legal_moves)
+
 
     def load_game_from_fen(self, fen):
         self.model = chess_model.ChessModel(fen)

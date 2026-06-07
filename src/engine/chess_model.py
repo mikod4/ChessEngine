@@ -1,5 +1,6 @@
 import chess
 
+
 class ChessModel:
     def __init__(self, fen=None):
         self.board = chess.Board(fen) if fen else chess.Board()
@@ -14,7 +15,7 @@ class ChessModel:
                 return False
         except ValueError:
             return False
-        
+
     def get_legal_moves(self, square):
         try:
             square_index = chess.parse_square(square)

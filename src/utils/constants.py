@@ -36,4 +36,3 @@ ILLEGAL_SOUND = "assets/sounds/illegal.wav"
 FEN_DEFAULT = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 FEN_TEST_1 = "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3"
 FEN_TEST_2 = "r1bqkbnr/pppppppp/8/2n5/4K3/8/PPPPPPPP/RNBQ1BNR w KQkq - 0 1"
-
