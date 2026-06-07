@@ -31,3 +31,7 @@ class Sidebar(QWidget):
 
     def toggle_side_bar(self, show):
         self.setVisible(show)
+
+    def restart(self):
+        self.move_table.setRowCount(0)
+        self.last_col = 0

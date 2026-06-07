@@ -6,9 +6,12 @@ from src.utils.constants import SQUARE_SIZE, COLOR, HIGLIGHT_COLOR, CHECK_COLOR
 
 class Board(QGraphicsView):
     square_clicked = pyqtSignal(str)
+    promote_pawn = pyqtSignal(str, str)
 
     def __init__(self):
         super().__init__()
+        self.is_flipped = False
+        self.check_highlight_item = None
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -50,17 +53,22 @@ class Board(QGraphicsView):
                 self.scene.addItem(rect)
 
     def clear_check_highlight(self):
-        for item in self.scene.items():
-            if isinstance(item, QGraphicsRectItem) and item.brush().color() == CHECK_COLOR:
-                self.scene.removeItem(item)
+        if self.check_highlight_item in self.scene.items():
+            self.scene.removeItem(self.check_highlight_item)
+            self.check_highlight_item = None
     
     def highlight_check(self, square):
         col = ord(square[0]) - ord('a')
         row = 8 - int(square[1])
 
-        rect = QGraphicsRectItem(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+        visual_row = 7 - row if self.is_flipped else row
+        visual_col = 7 - col if self.is_flipped else col
+
+        rect = QGraphicsRectItem(visual_col * SQUARE_SIZE, visual_row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
         rect.setBrush(QBrush(CHECK_COLOR))
         rect.setZValue(4)
+
+        self.check_highlight_item = rect
         self.scene.addItem(rect)
 
     def clear_move_highlights(self):
@@ -73,8 +81,11 @@ class Board(QGraphicsView):
             col = ord(sq[2]) - ord('a')
             row = 8 - int(sq[3])
 
-            center_x = col * SQUARE_SIZE + (SQUARE_SIZE / 2)
-            center_y = row * SQUARE_SIZE + (SQUARE_SIZE / 2)
+            visual_row = 7 - row if self.is_flipped else row
+            visual_col = 7 - col if self.is_flipped else col
+
+            center_x = visual_col * SQUARE_SIZE + (SQUARE_SIZE / 2)
+            center_y = visual_row * SQUARE_SIZE + (SQUARE_SIZE / 2)
 
             radius = SQUARE_SIZE * 0.15
 
@@ -92,7 +103,10 @@ class Board(QGraphicsView):
         row = int(pos.y() // SQUARE_SIZE)
 
         if 0 <= col < 8 and 0 <= row < 8:
-           return f"{chr(col + ord('a'))}{8 - row}"
+            if self.is_flipped:
+                return f"{chr(7 - col + ord('a'))}{row + 1}"
+            else:
+                return f"{chr(col + ord('a'))}{8 - row}"
         return None
     
     def mousePressEvent(self, event):
@@ -112,12 +126,18 @@ class Board(QGraphicsView):
                 self.scene.removeItem(item)
 
         rows = fen.split()[0].split('/')
-        for row_index, row in enumerate(rows):
-            col_index = 0
+        for fen_row_index, row in enumerate(rows):
+            fen_col_index = 0
             for char in row:
                 if char.isdigit():
-                    col_index += int(char)
+                    fen_col_index += int(char)
                 else:
-                    piece_item = Piece(char, row_index, col_index)
+                    visual_row = 7 - fen_row_index if self.is_flipped else fen_row_index
+                    visual_col = 7 - fen_col_index if self.is_flipped else fen_col_index
+                    piece_item = Piece(char, visual_row, visual_col)
+
                     self.scene.addItem(piece_item)
-                    col_index += 1
+                    fen_col_index += 1
+
+    def set_flipped(self, flipped):
+        self.is_flipped = flipped

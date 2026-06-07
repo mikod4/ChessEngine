@@ -31,3 +31,7 @@ class EvaluationBar(QProgressBar):
 
     def toggle_eval_bar(self, checked):
         self.setVisible(checked)
+
+    def restart(self):
+        self.setValue(START_EVAL)
+        self.setFormat(FORMAT_EVAL)

@@ -1,2 +1,3 @@
 python-chess
 PyQt6
+PyQt6-Qt6

@@ -1,11 +1,14 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QIcon, QAction, QActionGroup
-from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QLayout
+from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QLayout, QFileDialog, QPushButton
+from PyQt6.QtMultimedia import QSoundEffect
+
 from src.controllers.game_controller import GameController
 from src.views.board import Board
 from src.views.sidebar import Sidebar
 from src.views.evaluation_bar import EvaluationBar
-from src.utils.constants import TITLE, ICON_PATH, SIDEBAR_SIZE
+from src.utils.constants import TITLE, ICON_PATH, SIDEBAR_SIZE, ILLEGAL_SOUND
+from src.utils.file_handler import save_game, load_game
 
 
 
@@ -25,12 +28,16 @@ class MainWindow(QMainWindow):
         self.controller.board_updated.connect(self.board.update_board)
 
         self.controller.move_made.connect(self.sidebar.add_move)
+        self.controller.promote_pawn.connect(self.board.promote_pawn)
 
         self.controller.show_move_highlights.connect(self.board.show_move_highlights)
         self.controller.clear_move_highlights.connect(self.board.clear_move_highlights)
         self.controller.illegal_move.connect(self.play_error_sounds)
         self.controller.highlight_check.connect(self.board.highlight_check)
         self.controller.clear_check_highlight.connect(self.board.clear_check_highlight)
+
+        self.illegal_move_sound = QSoundEffect()
+        self.illegal_move_sound.setSource(QUrl.fromLocalFile(ILLEGAL_SOUND))
 
         self.controller.run_initial_checks()
 
@@ -57,6 +64,7 @@ class MainWindow(QMainWindow):
 
 
     def create_menu(self):
+        # widok
         menu_bar = self.menuBar()
 
         self.view_menu = menu_bar.addMenu("Pokaż")
@@ -74,14 +82,18 @@ class MainWindow(QMainWindow):
         self.toggle_sidebar_action.setChecked(True)
         self.toggle_sidebar_action.triggered.connect(self.sidebar.toggle_side_bar)
         self.view_menu.addAction(self.toggle_sidebar_action)
-
         
-        
+        # bot
         self.bot_menu = menu_bar.addMenu("Silnik")
         
         self.engine_group = QActionGroup(self)
         self.engine_group.setExclusive(True)
 
+
+        self.no_engine_action = QAction("Brak silnika", self)
+        self.no_engine_action.setCheckable(True)
+        self.engine_group.addAction(self.no_engine_action)
+        self.bot_menu.addAction(self.no_engine_action)
 
         self.engine1_action = QAction("Włącz Silnik 1", self)
         self.engine1_action.setCheckable(True)
@@ -98,16 +110,95 @@ class MainWindow(QMainWindow):
 
         self.engine_group.triggered.connect(self.change_bot)
 
+        # gra
+        self.game_menu = menu_bar.addMenu("Gra")
+
+        self.save_action = QAction("Zapisz", self)
+        self.save_action.triggered.connect(self.save_game)
+        self.game_menu.addAction(self.save_action)
+
+        self.game_menu.addSeparator()
+
+        self.load_action = QAction("Wczytaj", self)
+        self.load_action.triggered.connect(self.load_game)
+        self.game_menu.addAction(self.load_action)
+
+        self.game_menu.addSeparator()
+
+        self.restart_action = QAction("Restart", self)
+        self.restart_action.triggered.connect(self.restart_game)
+        self.game_menu.addAction(self.restart_action)
+
+        # kolor
+        self.color_menu = menu_bar.addMenu("Kolor")
+
+        self.white_action = QAction("Białe", self)
+        self.white_action.setCheckable(True)
+        self.white_action.setChecked(True)
+        self.color_menu.addAction(self.white_action)
+
+        self.color_menu.addSeparator()
+
+        self.black_action = QAction("Czarne", self)
+        self.black_action.setCheckable(True)
+        self.black_action.setChecked(False)
+        self.color_menu.addAction(self.black_action)
+
+        self.color_group = QActionGroup(self)
+        self.color_group.setExclusive(True)
+        self.color_group.addAction(self.white_action)
+        self.color_group.addAction(self.black_action)
+
+        self.color_group.triggered.connect(self.toggle_board_color)
+        
+
+    def save_game(self):
+        fen = self.controller.get_board_fen()
+        success, message = save_game(fen)
+
+        if not success:
+            print(f"Error saving game: {message}")
+        else:
+            print("Game saved successfully.")
+
+    def load_game(self):
+        options = QFileDialog.Option.ReadOnly
+        filename, _ = QFileDialog.getOpenFileName(self, "Wczytaj grę", "", "FEN Files (*.fen);;All Files (*)", options=options)
+
+        if filename:
+            success, result = load_game(filename)
+            if success:
+                self.controller.load_game_from_fen(result)
+                print("Game loaded successfully.")
+            else:
+                print(f"Error loading game: {result}")
+
+    def restart_game(self):
+        self.controller.restart_game()
+        self.eval_bar.restart()
+        self.sidebar.restart()
+
     def change_bot(self, engine):
         print(f"Changing bot to: {engine.text()}")
-
-        if engine == self.engine1_action:
+        if engine == self.no_engine_action:
+            pass
+        elif engine == self.engine1_action:
             pass
         elif engine == self.engine2_action:
             pass
+        
+    def toggle_board_color(self, action):
+        if action == self.white_action:
+            self.board.set_flipped(False)
+        elif action == self.black_action:
+            self.board.set_flipped(True)
+
+        self.update_board()
 
     def update_board(self):
         self.board.update_board(self.controller.model.get_board_fen())
 
     def play_error_sounds(self):
-        print("Illegal move attempted!")
+        if self.illegal_move_sound.isPlaying():
+            self.illegal_move_sound.stop()
+        self.illegal_move_sound.play()

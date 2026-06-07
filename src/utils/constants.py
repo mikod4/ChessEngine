@@ -23,6 +23,15 @@ TABLE_COLUMNS = ["Białe", "Czarne"]
 # Pieces
 PIECES_ICONS = "assets/images/pieces/"
 
+# Sounds
+CAPTURE_SOUND = "assets/sounds/capture.wav"
+CASTLE_SOUND = "assets/sounds/castle.wav"
+CHECK_SOUND = "assets/sounds/check.wav"
+MOVE_SOUND = "assets/sounds/move.wav"
+ILLEGAL_SOUND = "assets/sounds/illegal.wav"
+
+
+
 # FEN
 FEN_DEFAULT = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 FEN_TEST_1 = "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3"

@@ -22,14 +22,9 @@ class ChessModel:
         except ValueError:
             return []
         
-    def get_board_fen(self):
-        return self.board.fen()
-    
-    def get_check_square(self):
-        if self.board.is_check():
-            return chess.square_name(self.board.king(self.board.turn))
-        return None
-    
+    def reset_board(self):
+        self.board.reset()
+
     def get_last_move(self):
         if self.board.move_stack:
             move = self.board.peek()
@@ -41,3 +36,46 @@ class ChessModel:
             return last_move
         
         return None
+
+    def get_check_square(self):
+        if self.board.is_check():
+            return chess.square_name(self.board.king(self.board.turn))
+        return None
+
+    def is_game_over(self):
+        return self.board.is_game_over()
+    
+    def get_game_result(self):
+        if self.board.is_checkmate():
+            return "checkmate"
+        elif self.board.is_stalemate():
+            return "stalemate"
+        elif self.board.is_insufficient_material():
+            return "insufficient_material"
+        elif self.board.is_seventyfive_moves():
+            return "seventyfive_moves"
+        elif self.board.is_threefold_repetition():
+            return "threefold_repetition"
+        else:
+            return "ongoing"
+        
+    def get_turn(self):
+        return "white" if self.board.turn == chess.WHITE else "black"
+    
+    def promote_pawn(self, move_uci, promotion_piece, color):
+        try:
+            move = chess.Move.from_uci(move_uci)
+            if move in self.board.legal_moves:
+                move.promotion = promotion_piece
+                self.board.push(move)
+                return True
+            else:
+                return False
+        except ValueError:
+            return False
+        
+    def get_board_fen(self):
+        return self.board.fen()
+    
+    def set_board_fen(self, fen):
+        self.board.set_fen(fen)
