@@ -20,10 +20,11 @@ class GameController(QObject):
     def __init__(self):
         super().__init__()
         self.model = chess_model.ChessModel(FEN_DEFAULT)
-        self.bot_model = bot_random.RandomBot()
         self.player_color = chess.WHITE
         self.selected_square = None
 
+        self.bot_strategy = None
+        self.is_bot_enabled = False
         self.is_bot_thinking = False
         self.bot_thread = None
 
@@ -42,8 +43,9 @@ class GameController(QObject):
                 self.clear_check_highlight.emit()
 
 
-            if not self.is_bot_thinking:
-                self.trigger_bot_turn()
+            if self.is_bot_enabled and not self.is_bot_thinking:
+                if self.is_bot_turn():
+                    self.trigger_bot_turn()
 
             return True
 
@@ -51,18 +53,40 @@ class GameController(QObject):
             self.illegal_move.emit()
             return False
         
+    def set_player_color(self, is_white):
+        self.player_color = chess.WHITE if is_white else chess.BLACK
+
+        if self.is_bot_enabled and not self.is_bot_thinking:
+            if self.is_bot_turn():
+                self.trigger_bot_turn()
+
+    def set_bot_strategy(self, strategy):
+        self.bot_strategy = strategy
+
+    def set_bot_enabled(self, enabled):
+        self.is_bot_enabled = enabled
+        if enabled and not self.is_bot_thinking and self.is_bot_turn():
+            self.trigger_bot_turn()
+
+    def is_bot_turn(self):
+        current_turn = self.model.get_turn()
+        return (current_turn == "white" and self.player_color == chess.BLACK) or \
+               (current_turn == "black" and self.player_color == chess.WHITE)
+
     def trigger_bot_turn(self):
         self.is_bot_thinking = True
-        self.bot_thread = BotWorker(self.model.get_board_fen())
+        
+        self.bot_thread = BotWorker(self.model.get_board_fen(), self.bot_strategy)
+        
         self.bot_thread.move_ready.connect(self.on_bot_move_ready)
+        self.bot_thread.finished.connect(self.bot_thread.deleteLater)
+
         self.bot_thread.start()
 
     def on_bot_move_ready(self, move_uci):
-        self.is_bot_thinking = False
-
-        self.bot_thread.deleteLater()
-        self.bot_thread = None
+        self.bot_thread.move_ready.disconnect(self.on_bot_move_ready)
         
+        self.is_bot_thinking = False
         self.make_move(move_uci)
         
     def get_board_fen(self):
@@ -75,8 +99,14 @@ class GameController(QObject):
         self.clear_move_highlights.emit()
         self.clear_check_highlight.emit()
 
+        if self.is_bot_enabled and self.is_bot_turn():
+            self.trigger_bot_turn()
+
     def handle_square_click(self, square):
         if self.is_bot_thinking:
+            return
+        
+        if self.is_bot_enabled and self.is_bot_turn():
             return
 
         if self.selected_square:

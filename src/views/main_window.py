@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QLayout, QFileDia
 from PyQt6.QtMultimedia import QSoundEffect
 
 from src.controllers.game_controller import GameController
+from src.engine.bots import bot_random
 from src.views.board import Board
 from src.views.sidebar import Sidebar
 from src.views.evaluation_bar import EvaluationBar
@@ -86,29 +87,29 @@ class MainWindow(QMainWindow):
         # bot
         self.bot_menu = menu_bar.addMenu("Silnik")
         
-        self.engine_group = QActionGroup(self)
-        self.engine_group.setExclusive(True)
+        self.bot_group = QActionGroup(self)
+        self.bot_group.setExclusive(True)
 
 
-        self.no_engine_action = QAction("Brak silnika", self)
-        self.no_engine_action.setCheckable(True)
-        self.engine_group.addAction(self.no_engine_action)
-        self.bot_menu.addAction(self.no_engine_action)
+        self.no_bot_action = QAction("Brak silnika", self)
+        self.no_bot_action.setCheckable(True)
+        self.no_bot_action.setChecked(True)
+        self.bot_group.addAction(self.no_bot_action)
+        self.bot_menu.addAction(self.no_bot_action)
 
-        self.engine1_action = QAction("Włącz Silnik 1", self)
-        self.engine1_action.setCheckable(True)
-        self.engine1_action.setChecked(True)
-        self.engine_group.addAction(self.engine1_action)
-        self.bot_menu.addAction(self.engine1_action)
+        self.bot1_action = QAction("Włącz Silnik 1", self)
+        self.bot1_action.setCheckable(True)
+        self.bot_group.addAction(self.bot1_action)
+        self.bot_menu.addAction(self.bot1_action)
 
         self.bot_menu.addSeparator()
 
-        self.engine2_action = QAction("Włącz Silnik 2", self)
-        self.engine2_action.setCheckable(True)
-        self.engine_group.addAction(self.engine2_action)
-        self.bot_menu.addAction(self.engine2_action)
+        self.bot2_action = QAction("Włącz Silnik 2", self)
+        self.bot2_action.setCheckable(True)
+        self.bot_group.addAction(self.bot2_action)
+        self.bot_menu.addAction(self.bot2_action)
 
-        self.engine_group.triggered.connect(self.change_bot)
+        self.bot_group.triggered.connect(self.change_bot)
 
         # gra
         self.game_menu = menu_bar.addMenu("Gra")
@@ -141,7 +142,6 @@ class MainWindow(QMainWindow):
 
         self.black_action = QAction("Czarne", self)
         self.black_action.setCheckable(True)
-        self.black_action.setChecked(False)
         self.color_menu.addAction(self.black_action)
 
         self.color_group = QActionGroup(self)
@@ -178,20 +178,25 @@ class MainWindow(QMainWindow):
         self.eval_bar.restart()
         self.sidebar.restart()
 
-    def change_bot(self, engine):
-        print(f"Changing bot to: {engine.text()}")
-        if engine == self.no_engine_action:
-            pass
-        elif engine == self.engine1_action:
-            pass
-        elif engine == self.engine2_action:
-            pass
+    def change_bot(self, bot):
+        print(f"Changing bot to: {bot.text()}")
+        if bot == self.no_bot_action:
+            self.controller.set_bot_enabled(False)
+        elif bot == self.bot1_action:
+            self.controller.set_bot_strategy(bot_random.RandomBot())
+            self.controller.set_bot_enabled(True)
+        elif bot == self.bot2_action:
+            # PLACEHOLDER NA NOWEGO BOTA
+            self.controller.set_bot_strategy(bot_random.RandomBot())
+            self.controller.set_bot_enabled(True)
         
     def toggle_board_color(self, action):
         if action == self.white_action:
             self.board.set_flipped(False)
+            self.controller.set_player_color(is_white=True)
         elif action == self.black_action:
             self.board.set_flipped(True)
+            self.controller.set_player_color(is_white=False)
 
         self.update_board()
 
