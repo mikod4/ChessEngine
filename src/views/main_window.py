@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QLayout, QFileDia
 from PyQt6.QtMultimedia import QSoundEffect
 
 from src.controllers.game_controller import GameController
-from src.engine.bots import bot_random
+from src.engine.bots import bot_random, bot_minimax
 from src.views.board import Board
 from src.views.sidebar import Sidebar
 from src.views.evaluation_bar import EvaluationBar
@@ -85,29 +85,38 @@ class MainWindow(QMainWindow):
         self.view_menu.addAction(self.toggle_sidebar_action)
         
         # bot
-        self.bot_menu = menu_bar.addMenu("Silnik")
+        self.bot_menu = menu_bar.addMenu("Bot")
         
         self.bot_group = QActionGroup(self)
         self.bot_group.setExclusive(True)
 
 
-        self.no_bot_action = QAction("Brak silnika", self)
+        self.no_bot_action = QAction("Brak bota", self)
         self.no_bot_action.setCheckable(True)
         self.no_bot_action.setChecked(True)
         self.bot_group.addAction(self.no_bot_action)
         self.bot_menu.addAction(self.no_bot_action)
 
-        self.bot1_action = QAction("Włącz Silnik 1", self)
+        self.bot_menu.addSeparator()
+
+        self.bot1_action = QAction("Random", self)
         self.bot1_action.setCheckable(True)
         self.bot_group.addAction(self.bot1_action)
         self.bot_menu.addAction(self.bot1_action)
 
         self.bot_menu.addSeparator()
 
-        self.bot2_action = QAction("Włącz Silnik 2", self)
+        self.bot2_action = QAction("Minimax depth 3", self)
         self.bot2_action.setCheckable(True)
         self.bot_group.addAction(self.bot2_action)
         self.bot_menu.addAction(self.bot2_action)
+
+        self.bot_menu.addSeparator()
+
+        self.bot3_action = QAction("Minimax depth 5", self)
+        self.bot3_action.setCheckable(True)
+        self.bot_group.addAction(self.bot3_action)
+        self.bot_menu.addAction(self.bot3_action)
 
         self.bot_group.triggered.connect(self.change_bot)
 
@@ -186,8 +195,10 @@ class MainWindow(QMainWindow):
             self.controller.set_bot_strategy(bot_random.RandomBot())
             self.controller.set_bot_enabled(True)
         elif bot == self.bot2_action:
-            # PLACEHOLDER NA NOWEGO BOTA
-            self.controller.set_bot_strategy(bot_random.RandomBot())
+            self.controller.set_bot_strategy(bot_minimax.MinimaxBot())
+            self.controller.set_bot_enabled(True)
+        elif bot == self.bot3_action:
+            self.controller.set_bot_strategy(bot_minimax.MinimaxBot(depth=5))
             self.controller.set_bot_enabled(True)
         
     def toggle_board_color(self, action):

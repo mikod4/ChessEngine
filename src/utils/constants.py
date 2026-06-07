@@ -5,6 +5,9 @@ TITLE = "Chess"
 ICON_PATH = "assets/icons/icon.svg"
 SIDEBAR_SIZE = 280
 
+# Bot settings
+MINIMAX_DEPTH = 3
+
 # Board
 SQUARE_SIZE = 60
 COLOR = [(240, 217, 181), (181, 136, 99)]
@@ -29,8 +32,6 @@ CASTLE_SOUND = "assets/sounds/castle.wav"
 CHECK_SOUND = "assets/sounds/check.wav"
 MOVE_SOUND = "assets/sounds/move.wav"
 ILLEGAL_SOUND = "assets/sounds/illegal.wav"
-
-
 
 # FEN
 FEN_DEFAULT = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"

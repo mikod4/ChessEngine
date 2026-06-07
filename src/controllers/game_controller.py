@@ -1,7 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 import chess
 from src.engine import chess_model
-from src.engine.bots import bot_random
 from src.utils.constants import FEN_DEFAULT
 from src.controllers.bot_worker import BotWorker
 
@@ -84,11 +83,10 @@ class GameController(QObject):
         self.bot_thread.start()
 
     def on_bot_move_ready(self, move_uci):
-        self.bot_thread.move_ready.disconnect(self.on_bot_move_ready)
-        
         self.is_bot_thinking = False
-        self.make_move(move_uci)
-        
+        if self.is_bot_enabled and self.is_bot_turn():
+            self.make_move(move_uci)
+            
     def get_board_fen(self):
         return self.model.get_board_fen()
     
