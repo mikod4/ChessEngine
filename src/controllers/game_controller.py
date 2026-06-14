@@ -13,6 +13,8 @@ class GameController(QObject):
     clear_move_highlights = pyqtSignal()
     highlight_check = pyqtSignal(str)
     clear_check_highlight = pyqtSignal()
+    highlight_last_move = pyqtSignal(str, str)
+    clear_last_move_highlight = pyqtSignal()
     promote_pawn = pyqtSignal(str, str)
 
 
@@ -32,9 +34,18 @@ class GameController(QObject):
             self.highlight_check.emit(self.model.get_check_square())
 
     def make_move(self, move_uci):
+        move_str = str(move_uci)
+
         if self.model.try_move(move_uci):
             self.board_updated.emit(self.model.get_board_fen())
-            self.move_made.emit(self.model.get_last_move())
+
+            last_move = self.model.get_last_move()
+            self.move_made.emit(last_move)
+
+            if move_str and len(move_str) >= 4:
+                start_square = move_str[:2]
+                end_square = move_str[2:4]
+                self.highlight_last_move.emit(start_square, end_square)
 
             if self.model.get_check_square():
                 self.highlight_check.emit(self.model.get_check_square())
@@ -96,6 +107,7 @@ class GameController(QObject):
         self.selected_square = None
         self.clear_move_highlights.emit()
         self.clear_check_highlight.emit()
+        self.clear_last_move_highlight.emit()
 
         if self.is_bot_enabled and self.is_bot_turn():
             self.trigger_bot_turn()
@@ -133,3 +145,4 @@ class GameController(QObject):
         self.selected_square = None
         self.clear_move_highlights.emit()
         self.clear_check_highlight.emit()
+        self.clear_last_move_highlight.emit()

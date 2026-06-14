@@ -11,6 +11,7 @@ class Piece(QGraphicsSvgItem):
         scale = SQUARE_SIZE / max(self.bounds.width(), self.bounds.height())
         self.setScale(scale)
         self.setPos(col * SQUARE_SIZE, row * SQUARE_SIZE)
+        self.setZValue(2)
 
     def rotate_piece(self, angle):
         self.setRotation(angle)

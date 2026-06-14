@@ -8,7 +8,7 @@ from src.engine.bots import bot_random, bot_minimax
 from src.views.board import Board
 from src.views.sidebar import Sidebar
 from src.views.evaluation_bar import EvaluationBar
-from src.utils.constants import TITLE, ICON_PATH, SIDEBAR_SIZE, ILLEGAL_SOUND
+from src.utils.constants import TITLE, ICON_PATH, SIDEBAR_SIZE, ILLEGAL_SOUND, MOVE_SOUND, CAPTURE_SOUND, CASTLE_SOUND, CHECK_SOUND
 from src.utils.file_handler import save_game, load_game
 
 
@@ -25,10 +25,17 @@ class MainWindow(QMainWindow):
         self.setup_ui()
         self.update_board()
 
+        self.init_signals()
+        self.init_sounds()
+
+        self.controller.run_initial_checks()
+
+    def init_signals(self):
         self.board.square_clicked.connect(self.controller.handle_square_click)
         self.controller.board_updated.connect(self.board.update_board)
 
         self.controller.move_made.connect(self.sidebar.add_move)
+        self.controller.move_made.connect(self.play_move_sound)
         self.controller.promote_pawn.connect(self.board.promote_pawn)
 
         self.controller.show_move_highlights.connect(self.board.show_move_highlights)
@@ -36,11 +43,24 @@ class MainWindow(QMainWindow):
         self.controller.illegal_move.connect(self.play_error_sounds)
         self.controller.highlight_check.connect(self.board.highlight_check)
         self.controller.clear_check_highlight.connect(self.board.clear_check_highlight)
+        self.controller.highlight_last_move.connect(self.board.highlight_last_move)
+        self.controller.clear_last_move_highlight.connect(self.board.clear_last_move_highlight)
+
+    def init_sounds(self):
+        self.move_sound = QSoundEffect()
+        self.move_sound.setSource(QUrl.fromLocalFile(MOVE_SOUND))
+
+        self.capture_sound = QSoundEffect()
+        self.capture_sound.setSource(QUrl.fromLocalFile(CAPTURE_SOUND))
+
+        self.castle_sound = QSoundEffect()
+        self.castle_sound.setSource(QUrl.fromLocalFile(CASTLE_SOUND))
+
+        self.check_sound = QSoundEffect()
+        self.check_sound.setSource(QUrl.fromLocalFile(CHECK_SOUND))
 
         self.illegal_move_sound = QSoundEffect()
         self.illegal_move_sound.setSource(QUrl.fromLocalFile(ILLEGAL_SOUND))
-
-        self.controller.run_initial_checks()
 
     def setup_ui(self):
         central_widget = QWidget()
@@ -213,6 +233,23 @@ class MainWindow(QMainWindow):
 
     def update_board(self):
         self.board.update_board(self.controller.model.get_board_fen())
+
+    def play_move_sound(self, move_san):
+        if not move_san:
+            return
+        
+        for sound in [self.move_sound, self.capture_sound, self.castle_sound, self.check_sound]:
+            if sound.isPlaying():
+                sound.stop()
+
+        if '+' in move_san or '#' in move_san:
+            self.check_sound.play()
+        elif 'x' in move_san:
+            self.capture_sound.play()
+        elif 'O-O' in move_san:
+            self.castle_sound.play()
+        else:
+            self.move_sound.play()
 
     def play_error_sounds(self):
         if self.illegal_move_sound.isPlaying():

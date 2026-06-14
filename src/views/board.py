@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPen
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsEllipseItem, QFrame
 from src.views.piece import Piece
-from src.utils.constants import SQUARE_SIZE, COLOR, HIGLIGHT_COLOR, CHECK_COLOR
+from src.utils.constants import SQUARE_SIZE, COLOR, HIGLIGHT_COLOR, CHECK_COLOR, LAST_MOVE_COLOR
 
 
 class Board(QGraphicsView):
@@ -29,6 +29,7 @@ class Board(QGraphicsView):
         self.scene.setSceneRect(0, 0, SQUARE_SIZE * 8, SQUARE_SIZE * 8)
         self.setScene(self.scene)
 
+        self.last_move_highlight_items = []
         self.hint_items = []
         self.draw_board()
 
@@ -52,6 +53,34 @@ class Board(QGraphicsView):
                 rect.setPen(pen)
 
                 self.scene.addItem(rect)
+
+    def clear_last_move_highlight(self):
+        for item in self.last_move_highlight_items:
+            if item.scene() == self.scene: 
+                self.scene.removeItem(item)
+        self.last_move_highlight_items.clear()
+
+    def highlight_last_move(self, start_square, end_square):
+        self.clear_last_move_highlight()
+        highlight_color = LAST_MOVE_COLOR 
+
+        for square in (start_square, end_square):
+            if not square:
+                continue
+
+            col = ord(square[0]) - ord('a')
+            row = 8 - int(square[1])
+
+            visual_row = 7 - row if self.is_flipped else row
+            visual_col = 7 - col if self.is_flipped else col
+
+            rect = QGraphicsRectItem(visual_col * SQUARE_SIZE, visual_row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+            rect.setBrush(QBrush(highlight_color))
+            rect.setPen(QPen(Qt.PenStyle.NoPen))
+            rect.setZValue(1) 
+
+            self.scene.addItem(rect)
+            self.last_move_highlight_items.append(rect)
 
     def clear_check_highlight(self):
         if self.check_highlight_item in self.scene.items():
