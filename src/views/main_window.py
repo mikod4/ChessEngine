@@ -234,19 +234,19 @@ class MainWindow(QMainWindow):
     def update_board(self):
         self.board.update_board(self.controller.model.get_board_fen())
 
-    def play_move_sound(self, move_san):
-        if not move_san:
+    def play_move_sound(self, move):
+        if not move:
             return
         
         for sound in [self.move_sound, self.capture_sound, self.castle_sound, self.check_sound]:
             if sound.isPlaying():
                 sound.stop()
 
-        if '+' in move_san or '#' in move_san:
+        if '+' in move or '#' in move:
             self.check_sound.play()
-        elif 'x' in move_san:
+        elif 'x' in move:
             self.capture_sound.play()
-        elif 'O-O' in move_san:
+        elif 'O-O' in move:
             self.castle_sound.play()
         else:
             self.move_sound.play()
