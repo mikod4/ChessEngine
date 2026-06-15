@@ -1,8 +1,19 @@
 from PyQt6.QtGui import QColor
+import sys
+import os
+
+def get_asset_path(relative_path):
+    """ Get absolute path to resource, necessary for pyinstaller to work """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 # MainWindow
 TITLE = "Chess"
-ICON_PATH = "assets/icons/icon.svg"
+ICON_PATH = get_asset_path("assets/icons/icon.svg")
 SIDEBAR_SIZE = 280
 
 # Bot settings
@@ -25,14 +36,14 @@ MAX_EVAL = 5.0
 TABLE_COLUMNS = ["Białe", "Czarne"]
 
 # Pieces
-PIECES_ICONS = "assets/images/pieces/"
+PIECES_ICONS = get_asset_path("assets/images/pieces/")
 
 # Sounds
-CAPTURE_SOUND = "assets/sounds/capture.wav"
-CASTLE_SOUND = "assets/sounds/castle.wav"
-CHECK_SOUND = "assets/sounds/check.wav"
-MOVE_SOUND = "assets/sounds/move.wav"
-ILLEGAL_SOUND = "assets/sounds/illegal.wav"
+CAPTURE_SOUND = get_asset_path("assets/sounds/capture.wav")
+CASTLE_SOUND = get_asset_path("assets/sounds/castle.wav")
+CHECK_SOUND = get_asset_path("assets/sounds/check.wav")
+MOVE_SOUND = get_asset_path("assets/sounds/move.wav")
+ILLEGAL_SOUND = get_asset_path("assets/sounds/illegal.wav")
 
 # FEN
 FEN_DEFAULT = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
