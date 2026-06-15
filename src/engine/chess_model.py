@@ -44,7 +44,7 @@ class ChessModel:
         return None
 
     def is_game_over(self):
-        return self.board.is_game_over()
+        return self.board.is_game_over() or self.board.can_claim_threefold_repetition()
     
     def get_game_result(self):
         if self.board.is_checkmate():
@@ -55,7 +55,7 @@ class ChessModel:
             return "insufficient_material"
         elif self.board.is_seventyfive_moves():
             return "seventyfive_moves"
-        elif self.board.is_threefold_repetition():
+        elif self.board.can_claim_threefold_repetition():
             return "threefold_repetition"
         else:
             return "ongoing"

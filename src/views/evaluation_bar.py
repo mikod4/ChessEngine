@@ -8,6 +8,7 @@ class EvaluationBar(QProgressBar):
 
         self.setOrientation(Qt.Orientation.Vertical)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setFixedWidth(40)
 
         self.setRange(0, 100)
         self.setValue(START_EVAL)

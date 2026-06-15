@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QIcon, QAction, QActionGroup
-from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QLayout, QFileDialog, QPushButton
+from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QLayout, QFileDialog, QPushButton, QMessageBox
 from PyQt6.QtMultimedia import QSoundEffect
 
 from src.controllers.game_controller import GameController
@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
         self.controller.move_made.connect(self.play_move_sound)
         self.controller.promote_pawn.connect(self.show_promotion_dialog)
         self.controller.eval_ready.connect(self.eval_bar.set_evaluation)
+        self.controller.game_over.connect(self.show_game_over_popup)
 
         self.controller.show_move_highlights.connect(self.board.show_move_highlights)
         self.controller.clear_move_highlights.connect(self.board.clear_move_highlights)
@@ -257,6 +258,14 @@ class MainWindow(QMainWindow):
         if self.illegal_move_sound.isPlaying():
             self.illegal_move_sound.stop()
         self.illegal_move_sound.play()
+
+    def show_game_over_popup(self, message):
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Koniec Gry")
+        msg_box.setText(message)
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg_box.exec()
 
     def show_promotion_dialog(self, from_sq, to_sq):
         popup = PromotionPopUp(self)

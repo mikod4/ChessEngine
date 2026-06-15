@@ -17,6 +17,7 @@ class GameController(QObject):
     highlight_last_move = pyqtSignal(str, str)
     clear_last_move_highlight = pyqtSignal()
     promote_pawn = pyqtSignal(str, str)
+    game_over = pyqtSignal(str)
 
 
     def __init__(self):
@@ -52,6 +53,10 @@ class GameController(QObject):
                 self.highlight_check.emit(self.model.get_check_square())
             else:
                 self.clear_check_highlight.emit()
+
+            self.check_game_status()
+            if self.model.is_game_over():
+                return True
 
 
             if self.is_bot_enabled and not self.is_bot_thinking:
@@ -147,6 +152,25 @@ class GameController(QObject):
             self.selected_square = square
             legal_moves = self.model.get_legal_moves(square)
             self.show_move_highlights.emit(legal_moves)
+
+    def check_game_status(self):
+        if self.model.is_game_over():
+            result = self.model.get_game_result()
+            
+            if result == "checkmate":
+                current_turn = self.model.get_turn()
+                winner = "Czarne" if current_turn == "white" else "Białe"
+                msg = f"Koniec gry! Mat. Zwycięzca: {winner}."
+            elif result == "stalemate":
+                msg = "Koniec gry! Pat — remis."
+            elif result == "threefold_repetition":
+                msg = "Remis przez trzykrotne powtórzenie pozycji."
+            elif result == "insufficient_material":
+                msg = "Remis z powodu niewystarczającego materiału."
+            else:
+                msg = "Gra zakończona remisem."
+                
+            self.game_over.emit(msg)
 
     def is_promotion_move(self, from_sq, to_sq) -> bool:
         piece = self.model.board.piece_at(chess.parse_square(from_sq))
