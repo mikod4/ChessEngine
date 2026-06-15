@@ -6,6 +6,7 @@ from PyQt6.QtMultimedia import QSoundEffect
 from src.controllers.game_controller import GameController
 from src.engine.bots import bot_random, bot_minimax
 from src.views.board import Board
+from src.views.promotion_popup import PromotionPopUp
 from src.views.sidebar import Sidebar
 from src.views.evaluation_bar import EvaluationBar
 from src.utils.constants import TITLE, ICON_PATH, SIDEBAR_SIZE, ILLEGAL_SOUND, MOVE_SOUND, CAPTURE_SOUND, CASTLE_SOUND, CHECK_SOUND
@@ -36,7 +37,7 @@ class MainWindow(QMainWindow):
 
         self.controller.move_made.connect(self.sidebar.add_move)
         self.controller.move_made.connect(self.play_move_sound)
-        self.controller.promote_pawn.connect(self.board.promote_pawn)
+        self.controller.promote_pawn.connect(self.show_promotion_dialog)
 
         self.controller.show_move_highlights.connect(self.board.show_move_highlights)
         self.controller.clear_move_highlights.connect(self.board.clear_move_highlights)
@@ -255,3 +256,12 @@ class MainWindow(QMainWindow):
         if self.illegal_move_sound.isPlaying():
             self.illegal_move_sound.stop()
         self.illegal_move_sound.play()
+
+    def show_promotion_dialog(self, from_sq, to_sq):
+        popup = PromotionPopUp(self)
+        
+        if popup.exec():
+            chosen_piece = popup.selected_piece
+            self.controller.complete_pawn_promotion(from_sq, to_sq, chosen_piece)
+        else:
+            self.update_board()

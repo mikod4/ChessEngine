@@ -36,10 +36,11 @@ def test_avoids_obvious_blunder(bot):
     best_move = bot.get_move(board)
     assert best_move.startswith("a1"), "Biały bot powinien uciec atakowaną wieżą z a1"
 
-# def test_pawn_promotion(bot):
-#     board = chess.Board("4k3/3P4/8/8/8/8/8/4K3 w - - 0 1")
-#     best_move = bot.get_move(board)
-#     assert best_move == "d7d8q", "Bot powinien promować piona na hetmana"
+def test_pawn_promotion(bot):
+    # promocja piona na hetmana
+    board = chess.Board("5k2/3P4/8/8/8/8/8/4K3 w - - 0 1")
+    best_move = bot.get_move(board)
+    assert best_move == "d7d8q", "Bot powinien promować piona na hetmana"
 
 def test_order_moves_prioritizes_captures(bot):
     board = chess.Board("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2")

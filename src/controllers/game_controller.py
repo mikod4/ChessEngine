@@ -125,7 +125,15 @@ class GameController(QObject):
             if self.selected_square == square:
                 self.selected_square = None
                 self.clear_move_highlights.emit()
-            elif self.make_move(move_str):
+                return
+
+            if self.is_promotion_move(self.selected_square, square):
+                self.promote_pawn.emit(self.selected_square, square)
+                self.selected_square = None
+                self.clear_move_highlights.emit()
+                return
+
+            if self.make_move(move_str):
                 self.selected_square = None
                 self.clear_move_highlights.emit()
             else:
@@ -137,6 +145,20 @@ class GameController(QObject):
             self.selected_square = square
             legal_moves = self.model.get_legal_moves(square)
             self.show_move_highlights.emit(legal_moves)
+
+    def is_promotion_move(self, from_sq, to_sq) -> bool:
+        piece = self.model.board.piece_at(chess.parse_square(from_sq))
+        if piece and piece.piece_type == chess.PAWN:
+            to_rank = to_sq[1]
+            if (piece.color == chess.WHITE and to_rank == '8') or \
+               (piece.color == chess.BLACK and to_rank == '1'):
+                try_move = f"{from_sq}{to_sq}q"
+                return chess.Move.from_uci(try_move) in self.model.board.legal_moves
+        return False
+
+    def complete_pawn_promotion(self, from_sq, to_sq, piece_char):
+        move_uci = f"{from_sq}{to_sq}{piece_char}"
+        self.make_move(move_uci)
 
 
     def load_game_from_fen(self, fen):
