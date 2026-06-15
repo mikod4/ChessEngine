@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
         self.controller.move_made.connect(self.sidebar.add_move)
         self.controller.move_made.connect(self.play_move_sound)
         self.controller.promote_pawn.connect(self.show_promotion_dialog)
+        self.controller.eval_ready.connect(self.eval_bar.set_evaluation)
 
         self.controller.show_move_highlights.connect(self.board.show_move_highlights)
         self.controller.clear_move_highlights.connect(self.board.clear_move_highlights)

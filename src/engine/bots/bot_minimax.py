@@ -98,7 +98,7 @@ class MinimaxBot(Bot):
                 for sq in black_pieces:
                     eval -= (7 - chess.square_rank(sq)) * 10
 
-        return eval
+        return eval/100
     
     def order_moves(self, board):
         moves = list(board.legal_moves)

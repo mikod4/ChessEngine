@@ -8,6 +8,7 @@ from src.controllers.bot_worker import BotWorker
 class GameController(QObject):
     board_updated = pyqtSignal(str)
     move_made = pyqtSignal(str)
+    eval_ready = pyqtSignal(float)
     illegal_move = pyqtSignal()
     show_move_highlights = pyqtSignal(list)
     clear_move_highlights = pyqtSignal()
@@ -89,6 +90,7 @@ class GameController(QObject):
         self.bot_thread = BotWorker(self.model.get_board_fen(), self.bot_strategy)
         
         self.bot_thread.move_ready.connect(self.on_bot_move_ready)
+        self.bot_thread.eval_ready.connect(self.eval_ready.emit)
         self.bot_thread.finished.connect(self.bot_thread.deleteLater)
 
         self.bot_thread.start()

@@ -16,14 +16,14 @@ class EvaluationBar(QProgressBar):
     def set_evaluation(self, evaluation):
         clamped_score = max(MIN_EVAL, min(MAX_EVAL, evaluation))
 
-        percentage = (int(clamped_score + MAX_EVAL) * 10)
+        percentage = int((clamped_score - MIN_EVAL) / (MAX_EVAL - MIN_EVAL) * 100)
         self.setValue(percentage)
 
-
         if evaluation > 0:
-            text = f"+{evaluation}.1f"
+            text = f"+{evaluation:.1f}"
         elif evaluation < 0:
-            text = f"-{evaluation}.1f"
+
+            text = f"{evaluation:.1f}"
         else:
             text = "0.0"
 
