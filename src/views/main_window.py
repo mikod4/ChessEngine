@@ -186,12 +186,20 @@ class MainWindow(QMainWindow):
 
     def save_game(self):
         fen = self.controller.get_board_fen()
-        success, message = save_game(fen)
+        filename, _ = QFileDialog.getSaveFileName(
+            self, 
+            "Zapisz grę jako...",
+            "saved_game.fen",
+            "FEN Files (*.fen);;All Files (*)"
+        )
+        
+        if filename:
+            success, message = save_game(fen, filename)
 
-        if not success:
-            print(f"Error saving game: {message}")
-        else:
-            print("Game saved successfully.")
+            if not success:
+                print(f"Error saving game: {message}")
+            else:
+                print(f"Game saved successfully to: {filename}")
 
     def load_game(self):
         options = QFileDialog.Option.ReadOnly

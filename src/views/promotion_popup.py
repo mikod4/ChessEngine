@@ -6,7 +6,7 @@ class PromotionPopUp(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.setWindowTitle("Promotion")
+        self.setWindowTitle("Promocja piona")
         self.setModal(True)
 
         layout = QVBoxLayout(self)
@@ -14,10 +14,10 @@ class PromotionPopUp(QDialog):
         button_layout = QHBoxLayout()
         layout.addLayout(button_layout)
 
-        self.queen_button = QPushButton("Queen")
-        self.rook_button = QPushButton("Rook")
-        self.bishop_button = QPushButton("Bishop")
-        self.knight_button = QPushButton("Knight")
+        self.queen_button = QPushButton("Hetman")
+        self.rook_button = QPushButton("Wieża")
+        self.bishop_button = QPushButton("Goniec")
+        self.knight_button = QPushButton("Skoczek")
 
         button_layout.addWidget(self.queen_button)
         button_layout.addWidget(self.rook_button)
