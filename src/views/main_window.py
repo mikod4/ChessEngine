@@ -13,7 +13,6 @@ from src.utils.constants import TITLE, ICON_PATH, SIDEBAR_SIZE, ILLEGAL_SOUND, M
 from src.utils.file_handler import save_game, load_game
 
 
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -41,13 +40,18 @@ class MainWindow(QMainWindow):
         self.controller.eval_ready.connect(self.eval_bar.set_evaluation)
         self.controller.game_over.connect(self.show_game_over_popup)
 
-        self.controller.show_move_highlights.connect(self.board.show_move_highlights)
-        self.controller.clear_move_highlights.connect(self.board.clear_move_highlights)
+        self.controller.show_move_highlights.connect(
+            self.board.show_move_highlights)
+        self.controller.clear_move_highlights.connect(
+            self.board.clear_move_highlights)
         self.controller.illegal_move.connect(self.play_error_sounds)
         self.controller.highlight_check.connect(self.board.highlight_check)
-        self.controller.clear_check_highlight.connect(self.board.clear_check_highlight)
-        self.controller.highlight_last_move.connect(self.board.highlight_last_move)
-        self.controller.clear_last_move_highlight.connect(self.board.clear_last_move_highlight)
+        self.controller.clear_check_highlight.connect(
+            self.board.clear_check_highlight)
+        self.controller.highlight_last_move.connect(
+            self.board.highlight_last_move)
+        self.controller.clear_last_move_highlight.connect(
+            self.board.clear_last_move_highlight)
 
     def init_sounds(self):
         self.move_sound = QSoundEffect()
@@ -86,7 +90,6 @@ class MainWindow(QMainWindow):
 
         self.create_menu()
 
-
     def create_menu(self):
         # widok
         menu_bar = self.menuBar()
@@ -95,8 +98,9 @@ class MainWindow(QMainWindow):
 
         self.toggle_eval_action = QAction("Pasek Ewaluacji", self)
         self.toggle_eval_action.setCheckable(True)
-        self.toggle_eval_action.setChecked(True) 
-        self.toggle_eval_action.triggered.connect(self.eval_bar.toggle_eval_bar)
+        self.toggle_eval_action.setChecked(True)
+        self.toggle_eval_action.triggered.connect(
+            self.eval_bar.toggle_eval_bar)
         self.view_menu.addAction(self.toggle_eval_action)
 
         self.view_menu.addSeparator()
@@ -104,15 +108,15 @@ class MainWindow(QMainWindow):
         self.toggle_sidebar_action = QAction("Ruchy", self)
         self.toggle_sidebar_action.setCheckable(True)
         self.toggle_sidebar_action.setChecked(True)
-        self.toggle_sidebar_action.triggered.connect(self.sidebar.toggle_side_bar)
+        self.toggle_sidebar_action.triggered.connect(
+            self.sidebar.toggle_side_bar)
         self.view_menu.addAction(self.toggle_sidebar_action)
-        
+
         # bot
         self.bot_menu = menu_bar.addMenu("Bot")
-        
+
         self.bot_group = QActionGroup(self)
         self.bot_group.setExclusive(True)
-
 
         self.no_bot_action = QAction("Brak bota", self)
         self.no_bot_action.setCheckable(True)
@@ -182,36 +186,40 @@ class MainWindow(QMainWindow):
         self.color_group.addAction(self.black_action)
 
         self.color_group.triggered.connect(self.toggle_board_color)
-        
 
     def save_game(self):
         fen = self.controller.get_board_fen()
         filename, _ = QFileDialog.getSaveFileName(
-            self, 
+            self,
             "Zapisz grę jako...",
             "saved_game.fen",
             "FEN Files (*.fen);;All Files (*)"
         )
-        
+
         if filename:
             success, message = save_game(fen, filename)
 
             if not success:
-                print(f"Error saving game: {message}")
+                QMessageBox.critical(self, "Błąd zapisu",
+                                     f"Nie udało się zapisać gry:\n{message}")
             else:
-                print(f"Game saved successfully to: {filename}")
+                QMessageBox.information(
+                    self, "Zapis udany", "Gra została pomyślnie zapisana.")
 
     def load_game(self):
         options = QFileDialog.Option.ReadOnly
-        filename, _ = QFileDialog.getOpenFileName(self, "Wczytaj grę", "", "FEN Files (*.fen);;All Files (*)", options=options)
+        filename, _ = QFileDialog.getOpenFileName(
+            self, "Wczytaj grę", "", "FEN Files (*.fen);;All Files (*)", options=options)
 
         if filename:
             success, result = load_game(filename)
             if success:
                 self.controller.load_game_from_fen(result)
-                print("Game loaded successfully.")
+                QMessageBox.information(
+                    self, "Wczytano grę", "Gra została pomyślnie wczytana.")
             else:
-                print(f"Error loading game: {result}")
+                QMessageBox.critical(
+                    self, "Błąd wczytywania", f"Wystąpił błąd podczas wczytywania pliku:\n{result}")
 
     def restart_game(self):
         self.controller.restart_game()
@@ -231,7 +239,7 @@ class MainWindow(QMainWindow):
         elif bot == self.bot3_action:
             self.controller.set_bot_strategy(bot_minimax.MinimaxBot(depth=5))
             self.controller.set_bot_enabled(True)
-        
+
     def toggle_board_color(self, action):
         if action == self.white_action:
             self.board.set_flipped(False)
@@ -248,7 +256,7 @@ class MainWindow(QMainWindow):
     def play_move_sound(self, move):
         if not move:
             return
-        
+
         for sound in [self.move_sound, self.capture_sound, self.castle_sound, self.check_sound]:
             if sound.isPlaying():
                 sound.stop()
@@ -277,9 +285,10 @@ class MainWindow(QMainWindow):
 
     def show_promotion_dialog(self, from_sq, to_sq):
         popup = PromotionPopUp(self)
-        
+
         if popup.exec():
             chosen_piece = popup.selected_piece
-            self.controller.complete_pawn_promotion(from_sq, to_sq, chosen_piece)
+            self.controller.complete_pawn_promotion(
+                from_sq, to_sq, chosen_piece)
         else:
             self.update_board()
