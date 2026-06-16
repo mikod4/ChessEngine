@@ -22,7 +22,7 @@ class ChessModel:
             return [move.uci() for move in self.board.legal_moves if move.from_square == square_index]
         except ValueError:
             return []
-        
+
     def reset_board(self):
         self.board.reset()
 
@@ -35,7 +35,7 @@ class ChessModel:
             self.board.push(move)
 
             return last_move
-        
+
         return None
 
     def get_check_square(self):
@@ -45,7 +45,7 @@ class ChessModel:
 
     def is_game_over(self):
         return self.board.is_game_over() or self.board.can_claim_threefold_repetition()
-    
+
     def get_game_result(self):
         if self.board.is_checkmate():
             return "checkmate"
@@ -59,10 +59,10 @@ class ChessModel:
             return "threefold_repetition"
         else:
             return "ongoing"
-        
+
     def get_turn(self):
         return "white" if self.board.turn == chess.WHITE else "black"
-    
+
     def promote_pawn(self, move_uci, promotion_piece, color):
         try:
             move = chess.Move.from_uci(move_uci)
@@ -74,9 +74,9 @@ class ChessModel:
                 return False
         except ValueError:
             return False
-        
+
     def get_board_fen(self):
         return self.board.fen()
-    
+
     def set_board_fen(self, fen):
         self.board.set_fen(fen)

@@ -19,7 +19,6 @@ class GameController(QObject):
     promote_pawn = pyqtSignal(str, str)
     game_over = pyqtSignal(str)
 
-
     def __init__(self):
         super().__init__()
         self.model = chess_model.ChessModel(FEN_DEFAULT)
@@ -34,6 +33,8 @@ class GameController(QObject):
     def run_initial_checks(self):
         if self.model.get_check_square():
             self.highlight_check.emit(self.model.get_check_square())
+
+        self.check_game_status()
 
     def make_move(self, move_uci):
         move_str = str(move_uci)
@@ -58,7 +59,6 @@ class GameController(QObject):
             if self.model.is_game_over():
                 return True
 
-
             if self.is_bot_enabled and not self.is_bot_thinking:
                 if self.is_bot_turn():
                     self.trigger_bot_turn()
@@ -68,7 +68,7 @@ class GameController(QObject):
         else:
             self.illegal_move.emit()
             return False
-        
+
     def set_player_color(self, is_white):
         self.player_color = chess.WHITE if is_white else chess.BLACK
 
@@ -91,9 +91,10 @@ class GameController(QObject):
 
     def trigger_bot_turn(self):
         self.is_bot_thinking = True
-        
-        self.bot_thread = BotWorker(self.model.get_board_fen(), self.bot_strategy)
-        
+
+        self.bot_thread = BotWorker(
+            self.model.get_board_fen(), self.bot_strategy)
+
         self.bot_thread.move_ready.connect(self.on_bot_move_ready)
         self.bot_thread.eval_ready.connect(self.eval_ready.emit)
         self.bot_thread.finished.connect(self.bot_thread.deleteLater)
@@ -104,10 +105,10 @@ class GameController(QObject):
         self.is_bot_thinking = False
         if self.is_bot_enabled and self.is_bot_turn():
             self.make_move(move_uci)
-            
+
     def get_board_fen(self):
         return self.model.get_board_fen()
-    
+
     def restart_game(self):
         self.model = chess_model.ChessModel(FEN_DEFAULT)
         self.board_updated.emit(self.model.get_board_fen())
@@ -122,13 +123,13 @@ class GameController(QObject):
     def handle_square_click(self, square):
         if self.is_bot_thinking:
             return
-        
+
         if self.is_bot_enabled and self.is_bot_turn():
             return
 
         if self.selected_square:
             move_str = f"{self.selected_square}{square}"
-            
+
             if self.selected_square == square:
                 self.selected_square = None
                 self.clear_move_highlights.emit()
@@ -156,7 +157,7 @@ class GameController(QObject):
     def check_game_status(self):
         if self.model.is_game_over():
             result = self.model.get_game_result()
-            
+
             if result == "checkmate":
                 current_turn = self.model.get_turn()
                 winner = "Czarne" if current_turn == "white" else "Białe"
@@ -169,7 +170,7 @@ class GameController(QObject):
                 msg = "Remis z powodu niewystarczającego materiału."
             else:
                 msg = "Gra zakończona remisem."
-                
+
             self.game_over.emit(msg)
 
     def is_promotion_move(self, from_sq, to_sq) -> bool:
@@ -186,7 +187,6 @@ class GameController(QObject):
         move_uci = f"{from_sq}{to_sq}{piece_char}"
         self.make_move(move_uci)
 
-
     def load_game_from_fen(self, fen):
         self.model = chess_model.ChessModel(fen)
         self.board_updated.emit(fen)
@@ -194,3 +194,4 @@ class GameController(QObject):
         self.clear_move_highlights.emit()
         self.clear_check_highlight.emit()
         self.clear_last_move_highlight.emit()
+        self.run_initial_checks()
