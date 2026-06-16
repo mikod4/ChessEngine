@@ -1,6 +1,6 @@
 # ChessEngine
 
-> Projekt na przedmiot Języki Skryptowe.
+Projekt na przedmiot Języki Skryptowe.
 
 **ChessEngine** to aplikacja desktopowa napisana w Pythonie umożliwiająca grę w szachy pomiędzy dwoma graczami lub graczem oraz komputerem. Algorytmy grające w szachy można wybrać przed startem partii oraz w trakcie gry.
 
@@ -70,7 +70,6 @@ Interfejs podzielony jest horyzontalnie na trzy sekcje:
 | Funkcja | Opis |
 |---------|------|
 | Podświetlanie pól | Po zaznaczeniu figury wyświetlane są wszystkie legalne ruchy |
-| Ostatni ruch | Stale widoczne zaznaczenie ostatnio wykonanego posunięcia |
 | Szach | Pole pod zagrożonym królem podświetlane na czerwono |
 | Promocja pionka | Okno dialogowe wyboru figury po dotarciu do ostatniej linii |
 | System audio | Dźwięki dla ruchów, bić, roszad, szachów i nielegalnych posunięć |
